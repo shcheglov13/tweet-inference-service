@@ -1,0 +1,18 @@
+# Основные зависимости
+fastapi==0.110.0
+uvicorn==0.27.1
+pydantic==2.6.1
+python-multipart==0.0.9
+pyyaml==6.0.1
+
+# Научные библиотеки
+numpy==1.26.3
+pandas==2.2.0
+scikit-learn==1.4.0
+
+# FLAML и связанные библиотеки
+flaml==2.1.1
+
+# Логирование
+loguru==0.7.2
+tweet-features==0.1.0
