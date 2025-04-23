@@ -2,8 +2,7 @@
 Модуль для загрузки и управления моделями классификации твитов.
 """
 import os
-import pickle
-from pathlib import Path
+import joblib
 from typing import Any, Dict
 
 from app.config.config import config
@@ -38,7 +37,7 @@ class ModelLoader:
 
     def load_model(self) -> Any:
         """
-        Загружает модель из файла.
+        Загружает модель из файла joblib.
 
         Returns:
             Any: Загруженная модель FLAML.
@@ -56,8 +55,7 @@ class ModelLoader:
                 raise FileNotFoundError(f"Файл модели не найден: {self.model_path}")
 
             logger.info(f"Загрузка модели из {self.model_path}")
-            with open(self.model_path, 'rb') as file:
-                self.model = pickle.load(file)
+            self.model = joblib.load(self.model_path)
 
             logger.info(f"Модель успешно загружена. Версия: {self.model_info['version']}")
             return self.model

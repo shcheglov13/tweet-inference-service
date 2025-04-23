@@ -3,8 +3,8 @@
 """
 from typing import Dict, Any, List
 
+from tweet_features import FeaturePipeline
 from tweet_features.config import default_config
-from tweet_features.pipeline import FeaturePipeline
 
 from app.config.config import config
 from app.preprocessing.preprocessing import TweetPreprocessor

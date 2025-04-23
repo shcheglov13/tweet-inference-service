@@ -2,13 +2,13 @@
 service:
   name: tweet-inference-service
   version: 0.1.0
-  host: 0.0.0.0
+  host: localhost
   port: 8000
   debug: false
 
 # Настройки модели
 model:
-  path: app/models/tweet_classifier_model.pkl
+  path: app/models/tweet_classification_model.joblib
   threshold: 0.5  # Пороговое значение для классификации
   version: 0.1.0
 
