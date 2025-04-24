@@ -3,8 +3,7 @@
 """
 from typing import Dict, Any, List
 
-from tweet_features import FeaturePipeline
-from tweet_features.config import default_config
+from tweet_features import FeaturePipeline, FeatureConfig
 
 from app.config.config import config
 from app.preprocessing.preprocessing import TweetPreprocessor
@@ -28,32 +27,29 @@ class FeatureExtractor:
         self.preprocessor = TweetPreprocessor()
 
         # Получаем настройки для tweet-features из конфигурации
-        tweet_features_settings = config.get('tweet_features')
+        feature_extraction = config.get('feature_extraction')
+        tweet_features_settings = FeatureConfig(
+            use_cache=feature_extraction.get("use_cache", False),
+            cache_dir=feature_extraction.get("cache_dir", "./cache"),
+            device=feature_extraction.get("device", "cuda"),
+            dim_reduction_method=feature_extraction.get("dim_reduction_method", "PCA"),
+            text_embedding_dim=feature_extraction.get("text_embedding_dim", 30),
+            image_embedding_dim=feature_extraction.get("image_embedding_dim", 60),
+            batch_size=feature_extraction.get("batch_size", 32),
+            log_level=feature_extraction.get("log_level", "INFO")
+        )
 
         # Инициализируем пайплайн извлечения признаков
         self.feature_pipeline = FeaturePipeline(
-            config=default_config,
-            use_structural=tweet_features_settings.get('use_structural', True),
-            use_text=tweet_features_settings.get('use_text', True),
-            use_image=tweet_features_settings.get('use_image', True),
-            use_emotional=tweet_features_settings.get('use_emotional', True),
-            use_bert_embeddings=tweet_features_settings.get('use_bert_embeddings', True)
+            config=tweet_features_settings,
+            use_structural=True,
+            use_text=True,
+            use_image=True,
+            use_emotional=True,
+            use_bert_embeddings=True
         )
 
         logger.info("Инициализирован экстрактор признаков с использованием tweet-features")
-
-        # Логируем, какие типы признаков будут извлекаться
-        feature_types = []
-        if tweet_features_settings.get('use_structural', True):
-            feature_types.append('структурные')
-        if tweet_features_settings.get('use_text', True):
-            feature_types.append('текстовые')
-        if tweet_features_settings.get('use_image', True):
-            feature_types.append('визуальные')
-        if tweet_features_settings.get('use_emotional', True):
-            feature_types.append('эмоциональные')
-
-        logger.info(f"Типы извлекаемых признаков: {', '.join(feature_types)}")
 
     def extract_features(self, tweet_data: Dict[str, Any]) -> Dict[str, Any]:
         """
