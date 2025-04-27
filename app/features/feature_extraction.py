@@ -2,11 +2,8 @@
 Модуль для извлечения признаков из твитов с использованием пакета tweet-features.
 """
 from typing import Dict, Any, List
-
 from tweet_features import FeaturePipeline, FeatureConfig
-
 from app.config.config import config
-from app.preprocessing.preprocessing import TweetPreprocessor
 
 logger = config.logger
 
@@ -23,8 +20,6 @@ class FeatureExtractor:
         """
         Инициализирует экстрактор признаков с настройками из конфигурации.
         """
-        # Инициализируем предобработчик
-        self.preprocessor = TweetPreprocessor()
 
         # Получаем настройки для tweet-features из конфигурации
         feature_extraction = config.get('feature_extraction')
@@ -32,9 +27,6 @@ class FeatureExtractor:
             use_cache=feature_extraction.get("use_cache", False),
             cache_dir=feature_extraction.get("cache_dir", "./cache"),
             device=feature_extraction.get("device", "cuda"),
-            dim_reduction_method=feature_extraction.get("dim_reduction_method", "PCA"),
-            text_embedding_dim=feature_extraction.get("text_embedding_dim", 30),
-            image_embedding_dim=feature_extraction.get("image_embedding_dim", 60),
             batch_size=feature_extraction.get("batch_size", 32),
             log_level=feature_extraction.get("log_level", "INFO")
         )
@@ -64,18 +56,12 @@ class FeatureExtractor:
         Raises:
             Exception: Если возникла ошибка при извлечении признаков.
         """
-        logger.info(f"Извлечение признаков для твита с ID: {tweet_data.get('id', 'неизвестно')}")
+        logger.info(f"Извлечение признаков для твита с ID: {tweet_data.get('id')}")
 
         try:
-            # Предобрабатываем данные
-            preprocessed_data = self.preprocessor.preprocess(tweet_data)
-
-            # Извлекаем признаки
-            features = self.feature_pipeline.extract_single(preprocessed_data)
-
-            logger.info(f"Признаки успешно извлечены для твита с ID: {preprocessed_data.get('id', 'неизвестно')}")
+            features = self.feature_pipeline.extract_single(tweet_data)
+            logger.info(f"Признаки успешно извлечены для твита с ID: {tweet_data.get('id')}")
             logger.debug(f"Извлечено {len(features)} признаков")
-
             return features
         except Exception as e:
             logger.error(f"Ошибка при извлечении признаков: {str(e)}")

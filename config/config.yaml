@@ -17,9 +17,6 @@ feature_extraction:
   use_cache: false
   cache_dir: "./cache"
   device: "cuda"
-  dim_reduction_method: "PCA"
-  text_embedding_dim: 30
-  image_embedding_dim: 60
   batch_size: 32
   log_level: "INFO"
 

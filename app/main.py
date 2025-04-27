@@ -2,7 +2,6 @@
 Главный файл для запуска сервиса tweet-inference-service.
 """
 import uvicorn
-from app.api import app
 from app.config.config import config
 
 logger = config.logger

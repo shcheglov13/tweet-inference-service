@@ -31,8 +31,8 @@ async def health_check():
     return response
 
 
-@router.post("/predict", response_model=PredictionResponse, responses={400: {"model": ErrorResponse}},
-             tags=["Предсказания"])
+@router.post("/predict", response_model=PredictionResponse, responses={400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
+             tags=["Prediction"])
 async def predict(request: Request, tweet: TweetInput = Body(...)):
     """
     Выполняет предсказание для одного твита.

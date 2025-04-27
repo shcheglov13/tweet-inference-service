@@ -2,7 +2,7 @@
 Модуль с Pydantic-схемами для валидации входных и выходных данных API.
 """
 from typing import Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class TweetInput(BaseModel):
@@ -10,14 +10,13 @@ class TweetInput(BaseModel):
     Схема входных данных для твита.
     """
     id: str = Field(..., description="Идентификатор твита")
-    created_at: Optional[str] = Field(None, description="Дата и время создания твита")
+    created_at: str = Field(..., description="Дата и время создания твита")
     text: Optional[str] = Field(None, description="Текст твита")
-    tweet_type: Optional[str] = Field(None, description="Тип твита (REPLY, QUOTE, RETWEET, SINGLE)")
-    tx_count: Optional[int] = Field(None, description="Количество транзакций")
+    tweet_type: str = Field(..., description="Тип твита (REPLY, QUOTE, RETWEET, SINGLE)")
     image_url: Optional[str] = Field(None, description="URL изображения")
     quoted_text: Optional[str] = Field(None, description="Цитируемый текст")
 
-    @validator('tweet_type')
+    @field_validator('tweet_type')
     def validate_tweet_type(cls, v):
         """
         Валидирует тип твита.
@@ -31,13 +30,31 @@ class TweetInput(BaseModel):
         Raises:
             ValueError: Если тип твита имеет недопустимое значение.
         """
-        if v is not None:
-            valid_types = ['REPLY', 'QUOTE', 'RETWEET', 'SINGLE']
-            v_upper = v.upper()
-            if v_upper not in valid_types:
-                raise ValueError(f"Тип твита должен быть одним из {valid_types}")
-            return v_upper
-        return v
+        valid_types = ['REPLY', 'QUOTE', 'RETWEET', 'SINGLE']
+        v_upper = v.upper()
+        if v_upper not in valid_types:
+            raise ValueError(f"Тип твита должен быть одним из {valid_types}")
+        return v_upper
+
+    @model_validator(mode='after')
+    def validate_content(self):
+        """
+        Проверяет, что твит содержит хотя бы одно поле с значением:
+        основной текст, цитируемый текст или изображение.
+
+        Returns:
+            self: Экземпляр модели.
+
+        Raises:
+            ValueError: Если твит не содержит ни одного поля с значением.
+        """
+        if not (self.text or self.quoted_text or self.image_url):
+            raise ValueError(
+                "Твит должен содержать хотя бы одно поле с значением: "
+                "основной текст, цитируемый текст или изображение"
+            )
+
+        return self
 
     class Config:
         """
@@ -49,7 +66,6 @@ class TweetInput(BaseModel):
                 "created_at": "2025-02-12 17:27:31.000000 +00:00",
                 "text": "Пример текста твита",
                 "tweet_type": "QUOTE",
-                "tx_count": 42,
                 "image_url": "https://example.com/image.jpg",
                 "quoted_text": "Пример цитируемого текста"
             }

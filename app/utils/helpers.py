@@ -21,7 +21,7 @@ def generate_request_id() -> str:
 
 def validate_tweet_data(tweet_data: Dict[str, Any]) -> bool:
     """
-    Проверяет наличие необходимых полей в данных твита.
+    Проверяет валидность данных твита.
 
     Args:
         tweet_data (Dict[str, Any]): Данные твита.
@@ -30,11 +30,30 @@ def validate_tweet_data(tweet_data: Dict[str, Any]) -> bool:
         bool: True, если данные валидны, иначе False.
     """
     # Проверяем наличие обязательных полей
-    required_fields = ['id']
+    required_fields = ['id', 'created_at', 'tweet_type']
     for field in required_fields:
-        if field not in tweet_data:
+        if field not in tweet_data or not tweet_data[field]:
             logger.warning(f"В данных твита отсутствует обязательное поле '{field}'")
             return False
+
+    # Проверяем тип твита
+    valid_types = ['REPLY', 'QUOTE', 'RETWEET', 'SINGLE']
+    tweet_type = tweet_data.get('tweet_type', '').upper()
+    if tweet_type not in valid_types:
+        logger.warning(f"Недопустимый тип твита: {tweet_data.get('tweet_type')}")
+        return False
+
+    # Проверяем наличие хотя бы одного поля с контентом
+    text = tweet_data.get('text')
+    quoted_text = tweet_data.get('quoted_text')
+    image_url = tweet_data.get('image_url')
+
+    if not (text or quoted_text or image_url):
+        logger.warning(
+            "Твит должен содержать хотя бы одно поле с значением: "
+            "основной текст, цитируемый текст или изображение"
+        )
+        return False
 
     return True
 
